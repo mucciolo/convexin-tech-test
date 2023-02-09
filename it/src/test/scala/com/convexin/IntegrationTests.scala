@@ -13,16 +13,17 @@ import scala.io.Source
 import scala.reflect.io.Directory
 import scala.util.Using
 
-class UniqueKeyValuePairOddCountsTest extends AnyFlatSpec
+class IntegrationTests extends AnyFlatSpec
   with Matchers with BeforeAndAfterAll with BeforeAndAfterEach {
 
-  private val OutputPath = "src/test/resources/output"
+  private val ResourcesRoot = "it/src/test/resources"
+  private val OutputPath = s"$ResourcesRoot/output"
   private val TestCredentials = new BasicAWSCredentials("test-key", "test-secret")
   private implicit val SparkContext: SparkContext = createSparkContext(TestCredentials, threadsNum = "1")
 
   "uniquePairsByValueOddCount" should "aggregate all directory files" in {
     assertGeneratedFileIsExpected(
-      inputPath = "src/test/resources/multiple-files/*",
+      inputPath = s"$ResourcesRoot/multiple-files/*",
       expectedFile =
         """2	4
           |3	0
@@ -32,21 +33,21 @@ class UniqueKeyValuePairOddCountsTest extends AnyFlatSpec
 
   it should "discard header" in {
     assertGeneratedFileIsExpected(
-      inputPath = "src/test/resources/discard-header.csv",
+      inputPath = s"$ResourcesRoot/discard-header.csv",
       expectedFile = "1\t1"
     )
   }
 
   it should "default empty values to 0" in {
     assertGeneratedFileIsExpected(
-      inputPath = "src/test/resources/default-value-on-empty.tsv",
+      inputPath = s"$ResourcesRoot/default-value-on-empty.tsv",
       expectedFile = "1\t0"
     )
   }
 
   it should "drop empty keys" in {
     assertGeneratedFileIsExpected(
-      inputPath = "src/test/resources/drop-empty-keys.csv",
+      inputPath = s"$ResourcesRoot/drop-empty-keys.csv",
       expectedFile = "1\t1"
     )
   }
