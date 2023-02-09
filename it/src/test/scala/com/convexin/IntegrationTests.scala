@@ -18,8 +18,10 @@ class IntegrationTests extends AnyFlatSpec
 
   private val ResourcesRoot = "it/src/test/resources"
   private val OutputPath = s"$ResourcesRoot/output"
-  private val TestCredentials = new BasicAWSCredentials("test-key", "test-secret")
-  private implicit val SparkContext: SparkContext = createSparkContext(TestCredentials, threadsNum = "1")
+  private val TestCredentials =
+    new BasicAWSCredentials("test-key", "test-secret")
+  private implicit val SparkContext: SparkContext =
+    createSparkContext(TestCredentials, threadsNum = "1")
 
   "uniquePairsByValueOddCount" should "aggregate all directory files" in {
     assertGeneratedFileIsExpected(
@@ -33,7 +35,7 @@ class IntegrationTests extends AnyFlatSpec
 
   it should "discard header" in {
     assertGeneratedFileIsExpected(
-      inputPath = s"$ResourcesRoot/discard-header.csv",
+      inputPath = s"$ResourcesRoot/discard-header.tsv",
       expectedFile = "1\t1"
     )
   }

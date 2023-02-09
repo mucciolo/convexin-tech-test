@@ -15,10 +15,17 @@ object ConvexinTechTest {
 
     // TODO use Either
     val (inputPath, outputPath, awsProfileName) = args match {
-      case Array() => throw new InvalidArgumentException("Missing both input and output paths")
-      case Array(_) => throw new InvalidArgumentException("Missing output path")
-      case Array(inputPath, outputPath) => (inputPath, outputPath, None)
-      case Array(inputPath, outputPath, awsProfileName, _*) => (inputPath, outputPath, Some(awsProfileName))
+      case Array() =>
+        throw new InvalidArgumentException("Missing both input and output paths")
+
+      case Array(_) =>
+        throw new InvalidArgumentException("Missing output path")
+
+      case Array(inputPath, outputPath) =>
+        (inputPath, outputPath, None)
+
+      case Array(inputPath, outputPath, awsProfileName, _*) =>
+        (inputPath, outputPath, Some(awsProfileName))
     }
 
     val credentialsProvider = awsProfileName.map(new ProfileCredentialsProvider(_))
@@ -32,20 +39,35 @@ object ConvexinTechTest {
 
   def uniquePairsByValueOddCount(inputPath: String)(implicit sc: SparkContext): RDD[String] = {
 
-    val input = sc.textFile(inputPath)
+    val inputFiles = sc.textFile(inputPath)
     val keyValuePairs: RDD[(String, String)] =
-      input.filter(line => line.forall(c => c.isDigit || Separators.contains(c)))
-        .map(line => line.split(Separators))
-        .collect {
-          case Array(key) if key.nonEmpty => key -> DefaultValue
-          case Array(key, value, _*) if key.nonEmpty => key -> value
-        }
-
+      inputFiles.filter(isValidLine).map(splitLine).collect(nonEmptyArraysAsPair)
     val counts = keyValuePairs.map((_, 1)).reduceByKey(_ + _)
-    val oddCounts = counts.collect { case (keyValuePair, count) if count % 2 != 0 => keyValuePair }
-    val result = oddCounts.map { case (key, value) => s"$key\t$value" }
+    val oddCounts = counts.collect(oddCountPairs)
+    val result = oddCounts.map(pairToTsvLine)
 
     result.coalesce(1)
+  }
+
+  def pairToTsvLine(pair: (String, String)): String = pair match {
+    case (key, value) => s"$key\t$value"
+  }
+
+  val oddCountPairs: PartialFunction[((String, String), Int), (String, String)] = {
+    case (keyValuePair, count) if count % 2 != 0 => keyValuePair
+  }
+
+  val nonEmptyArraysAsPair: PartialFunction[Array[String], (String, String)] = {
+    case Array(key) if key.nonEmpty => key -> DefaultValue
+    case Array(key, value, _*) if key.nonEmpty => key -> value
+  }
+
+  def splitLine(line: String): Array[String] = {
+    line.split(Separators)
+  }
+
+  def isValidLine(line: String): Boolean = {
+    line.matches("""^-?\d+[,\t](?:-?\d+$)?""")
   }
 
   def createSparkContext(credentials: AWSCredentials, threadsNum: String = "*"): SparkContext = {
