@@ -93,10 +93,10 @@ object ConvexinTechTest {
     line.matches("""^-?\d+[,\t](?:-?\d+$)?""")
   }
 
-  def createSparkContext(credentials: AWSCredentials, threadsNum: String = "*"): SparkContext = {
+  def createSparkContext(credentials: AWSCredentials, threadsNum: Option[Int] = None): SparkContext = {
     val conf = new SparkConf()
       .setAppName("Convexin Tech Test")
-      .setMaster(s"local[$threadsNum]")
+      .setMaster(s"local[${threadsNum.getOrElse("*")}]")
       .set("spark.hadoop.fs.s3a.access.key", credentials.getAWSAccessKeyId)
       .set("spark.hadoop.fs.s3a.secret.key", credentials.getAWSSecretKey)
     //      .set("spark.hadoop.fs.s3a.endpoint", "http://localhost:4566")

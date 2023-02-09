@@ -21,7 +21,7 @@ class IntegrationTests extends AnyFlatSpec
   private val TestCredentials =
     new BasicAWSCredentials("test-key", "test-secret")
   private implicit val SparkContext: SparkContext =
-    createSparkContext(TestCredentials, threadsNum = "1")
+    createSparkContext(TestCredentials, threadsNum = Some(1))
 
   "uniquePairsByValueOddCount" should "aggregate all directory files" in {
     assertGeneratedFileIsExpected(
