@@ -1,8 +1,8 @@
 package com.convexin
 
 import ConvexinTechTest._
-
 import com.amazonaws.auth.BasicAWSCredentials
+
 import org.apache.spark.SparkContext
 import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -16,7 +16,7 @@ import scala.util.Using
 class IntegrationTests extends AnyFlatSpec
   with Matchers with BeforeAndAfterAll with BeforeAndAfterEach {
 
-  private val ResourcesRoot = "it/src/test/resources"
+  private val ResourcesRoot = "src/it/resources"
   private val OutputPath = s"$ResourcesRoot/output"
   private val TestCredentials =
     new BasicAWSCredentials("test-key", "test-secret")
