@@ -19,7 +19,7 @@ object ConvexinTechTest {
     parseArguments(args).fold(printError, runJob)
   }
 
-  private val printError: PartialFunction[ArgumentsParseError, Unit] = {
+  private def printError(error: ArgumentsParseError): Unit = error match {
     case MissingInput(inputs @ _*) =>
       println(
         inputs.mkString("Missing arguments: ",
