@@ -32,6 +32,7 @@ object ConvexinTechTest {
     val credentials = getAWSCredentials(parsedArgs.awsProfileName)
     implicit val sc: SparkContext = createSparkContext(credentials)
     uniquePairsByValueOddCount(parsedArgs.inputPath).saveAsTextFile(parsedArgs.outputPath)
+    sc.stop()
   }
 
   def parseArguments(args: Array[String]): Either[ArgumentsParseError, ParsedArgs] = {
