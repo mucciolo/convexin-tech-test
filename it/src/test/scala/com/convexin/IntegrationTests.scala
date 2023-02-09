@@ -28,8 +28,8 @@ class IntegrationTests extends AnyFlatSpec
       inputPath = s"$ResourcesRoot/multiple-files/*",
       expectedFile =
         """2	4
-          |3	0
-          |1	2""".stripMargin
+          |1	-2
+          |3	0""".stripMargin
     )
   }
 
