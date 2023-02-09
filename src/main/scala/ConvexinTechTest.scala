@@ -2,9 +2,13 @@ package com.convexin
 
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.auth.{AWSCredentials, DefaultAWSCredentialsProviderChain}
-import com.amazonaws.services.pi.model.InvalidArgumentException
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
+
+sealed trait ArgumentsParseError
+case class MissingInput(inputs: String*) extends ArgumentsParseError
+
+case class ParsedArgs(inputPath: String, outputPath: String, awsProfileName: Option[String])
 
 object ConvexinTechTest {
 
@@ -12,29 +16,47 @@ object ConvexinTechTest {
   private val DefaultValue = "0"
 
   def main(args: Array[String]): Unit = {
+    parseArguments(args).fold(printError, runJob)
+  }
 
-    // TODO use Either
-    val (inputPath, outputPath, awsProfileName) = args match {
+  private val printError: PartialFunction[ArgumentsParseError, Unit] = {
+    case MissingInput(inputs @ _*) =>
+      println(
+        inputs.mkString("Missing arguments: ",
+          ", ",
+          "\nsbt run <input-path> <output-path> ?<aws-profile>")
+      )
+  }
+
+  private def runJob(parsedArgs: ParsedArgs): Unit = {
+    val credentials = getAWSCredentials(parsedArgs.awsProfileName)
+    implicit val sc: SparkContext = createSparkContext(credentials)
+    uniquePairsByValueOddCount(parsedArgs.inputPath).saveAsTextFile(parsedArgs.outputPath)
+  }
+
+  def parseArguments(args: Array[String]): Either[ArgumentsParseError, ParsedArgs] = {
+
+    args match {
       case Array() =>
-        throw new InvalidArgumentException("Missing both input and output paths")
+        Left(MissingInput("input path", "output path"))
 
       case Array(_) =>
-        throw new InvalidArgumentException("Missing output path")
+        Left(MissingInput("output path"))
 
       case Array(inputPath, outputPath) =>
-        (inputPath, outputPath, None)
+        Right(ParsedArgs(inputPath, outputPath, None))
 
       case Array(inputPath, outputPath, awsProfileName, _*) =>
-        (inputPath, outputPath, Some(awsProfileName))
+        Right(ParsedArgs(inputPath, outputPath, Some(awsProfileName)))
     }
 
-    val credentialsProvider = awsProfileName.map(new ProfileCredentialsProvider(_))
+  }
+
+  private def getAWSCredentials(awsProfileName: Option[String]) = {
+    awsProfileName
+      .map(new ProfileCredentialsProvider(_))
       .getOrElse(new DefaultAWSCredentialsProviderChain)
-    val credentials = credentialsProvider.getCredentials
-
-    implicit val sc: SparkContext = createSparkContext(credentials)
-    uniquePairsByValueOddCount(inputPath).saveAsTextFile(outputPath)
-
+      .getCredentials
   }
 
   def uniquePairsByValueOddCount(inputPath: String)(implicit sc: SparkContext): RDD[String] = {

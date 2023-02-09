@@ -6,7 +6,7 @@ import org.scalatest.matchers.should._
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.wordspec.AnyWordSpec
 
-class UniquePairsByValueOddCountTests extends AnyWordSpec with Matchers {
+class UniquePairsByValueOddCountTest extends AnyWordSpec with Matchers {
 
   private val ValidLines = Table(
     "line",
