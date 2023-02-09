@@ -13,18 +13,18 @@ import scala.io.Source
 import scala.reflect.io.Directory
 import scala.util.Using
 
-class UniqueKeyValuePairOddCountsTest extends AnyFlatSpec with Matchers with BeforeAndAfterAll with BeforeAndAfterEach {
+class UniqueKeyValuePairOddCountsTest extends AnyFlatSpec
+  with Matchers with BeforeAndAfterAll with BeforeAndAfterEach {
 
   private val OutputPath = "src/test/resources/output"
   private val TestCredentials = new BasicAWSCredentials("test-key", "test-secret")
   private implicit val SparkContext: SparkContext = createSparkContext(TestCredentials, threadsNum = "1")
 
-  "uniquePairsByValueOddCount" should "read all directory files" in {
+  "uniquePairsByValueOddCount" should "aggregate all directory files" in {
     assertGeneratedFileIsExpected(
       inputPath = "src/test/resources/multiple-files/*",
       expectedFile =
         """2	4
-          |0	4
           |3	0
           |1	2""".stripMargin
     )
@@ -33,17 +33,21 @@ class UniqueKeyValuePairOddCountsTest extends AnyFlatSpec with Matchers with Bef
   it should "discard header" in {
     assertGeneratedFileIsExpected(
       inputPath = "src/test/resources/discard-header.csv",
-      expectedFile = "1	1"
+      expectedFile = "1\t1"
     )
   }
 
-  it should "default empty keys and values to 0" in {
+  it should "default empty values to 0" in {
     assertGeneratedFileIsExpected(
       inputPath = "src/test/resources/default-value-on-empty.tsv",
-      expectedFile =
-        """0	0
-          |0	1
-          |2	0""".stripMargin
+      expectedFile = "1\t0"
+    )
+  }
+
+  it should "drop empty keys" in {
+    assertGeneratedFileIsExpected(
+      inputPath = "src/test/resources/drop-empty-keys.csv",
+      expectedFile = "1\t1"
     )
   }
 
@@ -55,6 +59,8 @@ class UniqueKeyValuePairOddCountsTest extends AnyFlatSpec with Matchers with Bef
   private def deleteOutputPath(): Unit = new Directory(new File(OutputPath)).deleteRecursively()
 
   override protected def beforeAll(): Unit = deleteOutputPath()
+
+  override protected def afterAll(): Unit = SparkContext.stop()
 
   override protected def afterEach(): Unit = deleteOutputPath()
 

@@ -9,11 +9,11 @@ import org.apache.spark.{SparkConf, SparkContext}
 object ConvexinTechTest {
 
   private val Separators = Array(',', '\t')
-  private val DefaultKey = "0"
   private val DefaultValue = "0"
 
   def main(args: Array[String]): Unit = {
 
+    // TODO use Either
     val (inputPath, outputPath, awsProfileName) = args match {
       case Array() => throw new InvalidArgumentException("Missing both input and output paths")
       case Array(_) => throw new InvalidArgumentException("Missing output path")
@@ -33,14 +33,13 @@ object ConvexinTechTest {
   def uniquePairsByValueOddCount(inputPath: String)(implicit sc: SparkContext): RDD[String] = {
 
     val input = sc.textFile(inputPath)
-    val keyValuePairs: RDD[(String, String)] = input.collect {
-      case line if line.forall(c => c.isDigit || Separators.contains(c)) =>
-        val columns = line.split(Separators)
-        columns match {
-          case Array(key) => (if (key.nonEmpty) key else DefaultKey) -> DefaultValue
-          case Array(key, value, _*) => (if (key.nonEmpty) key else DefaultKey) -> value
+    val keyValuePairs: RDD[(String, String)] =
+      input.filter(line => line.forall(c => c.isDigit || Separators.contains(c)))
+        .map(line => line.split(Separators))
+        .collect {
+          case Array(key) if key.nonEmpty => key -> DefaultValue
+          case Array(key, value, _*) if key.nonEmpty => key -> value
         }
-    }
 
     val counts = keyValuePairs.map((_, 1)).reduceByKey(_ + _)
     val oddCounts = counts.collect { case (keyValuePair, count) if count % 2 != 0 => keyValuePair }
@@ -55,8 +54,8 @@ object ConvexinTechTest {
       .setMaster(s"local[$threadsNum]")
       .set("spark.hadoop.fs.s3a.access.key", credentials.getAWSAccessKeyId)
       .set("spark.hadoop.fs.s3a.secret.key", credentials.getAWSSecretKey)
-//      .set("spark.hadoop.fs.s3a.endpoint", "http://localhost:4566")
-//      .set("spark.hadoop.fs.s3a.path.style.access", "true")
+    //      .set("spark.hadoop.fs.s3a.endpoint", "http://localhost:4566")
+    //      .set("spark.hadoop.fs.s3a.path.style.access", "true")
 
     new SparkContext(conf)
   }
