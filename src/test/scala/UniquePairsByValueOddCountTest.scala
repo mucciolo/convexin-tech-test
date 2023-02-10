@@ -45,21 +45,21 @@ class UniquePairsByValueOddCountTest extends AnyWordSpec with Matchers {
 
   "A valid line array" should {
     "default value to 0 on pair conversion" in {
-      nonEmptyArraysAsPair(Array("1")) shouldBe ("1", "0")
+      nonEmptyArrayToPair(Array("1")) shouldBe ("1", "0")
     }
 
     "be converted to a pair" in {
-      nonEmptyArraysAsPair(Array("2", "2")) shouldBe ("2", "2")
+      nonEmptyArrayToPair(Array("2", "2")) shouldBe ("2", "2")
     }
   }
 
   "A pair count" should {
     "apply when odd" in {
-      assert(oddCountPairs.isDefinedAt((("1", "1"), 3)))
+      assert(hasOddCount(("1", "1"), 3))
     }
 
     "be filtered when even" in {
-      assert(!oddCountPairs.isDefinedAt((("2", "2"), 4)))
+      assert(!hasOddCount(("2", "2"), 4))
 
     }
   }

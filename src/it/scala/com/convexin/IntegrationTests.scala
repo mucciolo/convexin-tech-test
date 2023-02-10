@@ -18,7 +18,7 @@ class IntegrationTests extends AnyFlatSpec
   private val ResourcesRoot = "src/it/resources"
   private val OutputPath = s"$ResourcesRoot/output"
   private val SparkConf = new SparkConf().setAppName("IT").setMaster("local[1]")
-  private implicit val SparkContext: SparkContext = new SparkContext(SparkConf)
+  private val SparkContext: SparkContext = new SparkContext(SparkConf)
 
   "uniquePairsByValueOddCount" should "aggregate all directory files" in {
     assertGeneratedFileIsExpected(
@@ -65,7 +65,7 @@ class IntegrationTests extends AnyFlatSpec
   override protected def afterEach(): Unit = deleteOutputPath()
 
   private def run(inputPath: String): String = {
-    uniquePairsByValueOddCount(inputPath).saveAsTextFile(OutputPath)
+    uniquePairsByValueOddCount(SparkContext, inputPath).saveAsTextFile(OutputPath)
     Using(Source.fromFile(s"$OutputPath/part-00000"))(file => file.getLines().mkString("\n")).get
   }
 }
