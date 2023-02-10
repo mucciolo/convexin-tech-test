@@ -1,9 +1,8 @@
 package com.convexin
 
 import ConvexinTechTest._
-import com.amazonaws.auth.BasicAWSCredentials
 
-import org.apache.spark.SparkContext
+import org.apache.spark.{SparkConf, SparkContext}
 import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should._
@@ -18,10 +17,8 @@ class IntegrationTests extends AnyFlatSpec
 
   private val ResourcesRoot = "src/it/resources"
   private val OutputPath = s"$ResourcesRoot/output"
-  private val TestCredentials =
-    new BasicAWSCredentials("test-key", "test-secret")
-  private implicit val SparkContext: SparkContext =
-    createSparkContext(TestCredentials, threadsNum = Some(1))
+  private val SparkConf = new SparkConf().setAppName("IT").setMaster("local[1]")
+  private implicit val SparkContext: SparkContext = new SparkContext(SparkConf)
 
   "uniquePairsByValueOddCount" should "aggregate all directory files" in {
     assertGeneratedFileIsExpected(
