@@ -1,11 +1,12 @@
 package com.convexin
 
-import ConvexinTechTest._
+import Spark._
+import UniqueOddCountValuesByKey.uniqueOddCountValuesByKey
 
 import org.apache.spark.{SparkConf, SparkContext}
-import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should._
+import org.scalatest.{Assertion, BeforeAndAfterAll, BeforeAndAfterEach}
 
 import java.io.File
 import scala.io.Source
@@ -18,7 +19,7 @@ class IntegrationTests extends AnyFlatSpec
   private val ResourcesRoot = "src/it/resources"
   private val OutputPath = s"$ResourcesRoot/output"
   private val SparkConf = new SparkConf().setAppName("IT").setMaster("local[1]")
-  private val SparkContext: SparkContext = new SparkContext(SparkConf)
+  private val SparkContext = new SparkContext(SparkConf)
 
   "uniquePairsByValueOddCount" should "aggregate all directory files" in {
     assertGeneratedFileIsExpected(
@@ -65,7 +66,8 @@ class IntegrationTests extends AnyFlatSpec
   override protected def afterEach(): Unit = deleteOutputPath()
 
   private def run(inputPath: String): String = {
-    uniquePairsByValueOddCount(SparkContext, inputPath).saveAsTextFile(OutputPath)
+    val textLines = SparkContext.textFile(inputPath)
+    uniqueOddCountValuesByKey(textLines).coalesce(1).map(pairToTsvLine).saveAsTextFile(OutputPath)
     Using(Source.fromFile(s"$OutputPath/part-00000"))(file => file.getLines().mkString("\n")).get
   }
 }
