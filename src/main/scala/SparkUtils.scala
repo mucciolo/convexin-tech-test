@@ -5,7 +5,7 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
-object Spark {
+object SparkUtils {
 
   def createSparkContext(maybeAwsProfileName: Option[String]): SparkContext = {
     val conf = createSparkConf(maybeAwsProfileName)

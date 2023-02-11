@@ -1,12 +1,12 @@
 package com.convexin
 
-import Spark._
+import SparkUtils._
 
 import com.amazonaws.auth.BasicAWSCredentials
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should._
 
-final class SparkConfSpec extends AnyFreeSpec with Matchers {
+final class SparkUtilsSpec extends AnyFreeSpec with Matchers {
 
   private val AwsCredentialsProvider =
     (_: String) => new BasicAWSCredentials("access", "secret")
@@ -30,4 +30,11 @@ final class SparkConfSpec extends AnyFreeSpec with Matchers {
         "com.amazonaws.auth.DefaultAWSCredentialsProviderChain"
     }
   }
+
+  "pairToTsvLine" - {
+    "should convert a pair to tab-separated string" in {
+      pairToTsvLine(("1", "2")) should be ("1\t2")
+    }
+  }
+
 }

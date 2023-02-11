@@ -1,6 +1,6 @@
 package com.convexin
 
-import Spark._
+import SparkUtils._
 import UniqueOddCountValuesByKey.uniqueOddCountValuesByKey
 
 import org.apache.spark.{SparkConf, SparkContext}
