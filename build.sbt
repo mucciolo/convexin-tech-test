@@ -15,5 +15,8 @@ lazy val root = (project in file("."))
       "org.apache.hadoop" % "hadoop-aws" % HadoopVersion,
       "org.scalatest" %% "scalatest" % ScalaTestVersion % "test, it"
     ),
-    Defaults.itSettings
+    Defaults.itSettings,
+    IntegrationTest / fork := true,
+    IntegrationTest / envVars := Map("AWS_CREDENTIAL_PROFILES_FILE" -> "src/it/resources/aws/credentials")
+
   )
