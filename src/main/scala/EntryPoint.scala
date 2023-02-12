@@ -19,7 +19,7 @@ object EntryPoint {
 
       case _ =>
         throw new IllegalArgumentException(
-          "Missing arguments. Usage: sbt run <input-path> <output-path> ?<aws-profile>")
+          "Missing arguments. Usage: sbt run input-path output-path [aws-profile-name]")
     }
   }
 
