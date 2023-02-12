@@ -16,7 +16,5 @@ lazy val root = (project in file("."))
       "org.scalatest" %% "scalatest" % ScalaTestVersion % "test, it"
     ),
     Defaults.itSettings,
-    IntegrationTest / fork := true,
     IntegrationTest / envVars := Map("AWS_CREDENTIAL_PROFILES_FILE" -> "src/it/resources/aws/credentials")
-
   )

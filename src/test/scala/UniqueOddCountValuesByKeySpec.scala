@@ -3,13 +3,10 @@ package com.convexin
 
 import UniqueOddCountValuesByKey._
 
-import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
+import org.scalatest._
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.should._
-import org.scalatest._
-
-import scala.reflect.ClassTag
 
 final class UniqueOddCountValuesByKeySpec extends AnyFreeSpec with Matchers with BeforeAndAfterAll {
 
@@ -18,31 +15,20 @@ final class UniqueOddCountValuesByKeySpec extends AnyFreeSpec with Matchers with
 
   override protected def afterAll(): Unit = sc.stop()
 
-  private def assertRddIsExpected[T: ClassTag](actual: RDD[T], expected: T*): Assertion =
-    actual.collect() should be (expected.toArray)
-
-  "splitLinesIntoArray" - {
+  "splitByCommaOrTab" - {
     "should split comma-separated values" in {
-      val lines = sc.parallelize(Seq("1,2", "3,4"))
-      assertRddIsExpected(
-        actual = splitLinesIntoArray(lines),
-        expected = Array("1", "2"), Array("3", "4")
-      )
+      splitByCommaOrTab("1,2") should be (Array("1", "2"))
     }
 
     "should split tab-separated values" in {
-      val lines = sc.parallelize(Seq("1\t2", "3\t4"))
-      assertRddIsExpected(
-        actual = splitLinesIntoArray(lines),
-        expected = Array("1", "2"), Array("3", "4")
-      )
+      splitByCommaOrTab("1\t2") should be (Array("1", "2"))
     }
   }
 
-  "areIntegers" - {
+  "areAllElementsIntegers" - {
     "should return true given an array of integers" in {
       val integers = (-9 to 9).map(_.toString).toArray
-      areIntegers(integers) should be (true)
+      areAllElementsIntegers(integers) should be (true)
     }
 
     "should return false given an array containing a non-integer" in {
@@ -50,30 +36,20 @@ final class UniqueOddCountValuesByKeySpec extends AnyFreeSpec with Matchers with
       val nonIntegers = (32 to 126).map(_.toChar).filterNot(numbers).map(_.toString)
 
       Inspectors.forAll(nonIntegers) { c =>
-        areIntegers(Array("1", c)) should be (false)
+        areAllElementsIntegers(Array("1", c)) should be (false)
       }
     }
   }
 
-  "nonEmptyArrayToPair" - {
-    "should convert an array of two elements to a pair" in {
+  "toKeyValuePair" - {
+    "should convert an array of two elements representing the key and value columns to a pair" in {
       val pairAsArray = Array("1", "2")
-      nonEmptyArrayToPair(pairAsArray) should be ("1", "2")
+      toKeyValuePair(pairAsArray) should be ("1", "2")
     }
 
-    "should default second element (value) to 0" in {
+    "should default second element to 0 when value is missing" in {
       val pairAsArray = Array("1")
-      nonEmptyArrayToPair(pairAsArray) should be ("1", "0")
-    }
-  }
-
-  "countPairOccurrences" - {
-    "should count the number of occurrences of a pair" in {
-      val pairs = sc.parallelize(Seq(("1", "1"), ("1", "2"), ("3", "5"), ("1", "2")))
-      assertRddIsExpected(
-        actual = countPairOccurrences(pairs),
-        expected = (("3", "5"), 1), (("1", "1"), 1), (("1", "2"), 2)
-      )
+      toKeyValuePair(pairAsArray) should be ("1", "0")
     }
   }
 
@@ -92,10 +68,7 @@ final class UniqueOddCountValuesByKeySpec extends AnyFreeSpec with Matchers with
   "uniqueOddCountValuesByKey" - {
     "should return the pairs which the value occurs an odd number of times for the key" in {
       val lines = sc.parallelize(Seq("1,2", "2,3", "1,1", "2,3", "1,2", "2,3", "2,2", "2,2"))
-      assertRddIsExpected(
-        actual = uniqueOddCountValuesByKey(lines),
-        expected = ("2", "3"), ("1", "1")
-      )
+      uniqueOddCountValuesByKey(lines).collect() should be (Array(("2", "3"), ("1", "1")))
     }
   }
 

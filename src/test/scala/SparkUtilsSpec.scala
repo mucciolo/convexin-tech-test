@@ -31,9 +31,9 @@ final class SparkUtilsSpec extends AnyFreeSpec with Matchers {
     }
   }
 
-  "pairToTsvLine" - {
+  "toTsvLine" - {
     "should convert a pair to tab-separated string" in {
-      pairToTsvLine(("1", "2")) should be ("1\t2")
+      toTsvLine(("1", "2")) should be ("1\t2")
     }
   }
 

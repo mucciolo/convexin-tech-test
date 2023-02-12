@@ -1,13 +1,14 @@
 # Convexin Tech Test
 
-Usage:
+### Usage:
 ```
-sbt run <input-path> <output-path> ?<aws-profile>
+sbt run input-path output-path [aws-profile-name]
 ```
 
-Paths can be from local filesystem or use Hadoop S3A protocol.
+The input and output paths can be either local file paths or S3 bucket paths using the
+Hadoop S3A protocol. The AWS profile name is optional.
 
-S3 bucket example:
+### S3 bucket usage example:
 ```
-sbt run s3a://bucket/* s3a://bucket/output aws-profile
+sbt run s3a://bucket/input/* s3a://bucket/output convexin
 ```

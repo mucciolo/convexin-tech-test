@@ -1,11 +1,21 @@
 package com.convexin
 
+import SparkUtils.SparkConfKeys._
+
 import com.amazonaws.auth.AWSCredentials
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import org.apache.hadoop.fs.s3a.Constants._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkConf, SparkContext}
 
 object SparkUtils {
+
+  object SparkConfKeys {
+    private val HadoopConfKeyRoot: String = "spark.hadoop."
+    val AwsCredentialsProvider: String = HadoopConfKeyRoot + AWS_CREDENTIALS_PROVIDER
+    val AwsAccessKey: String = HadoopConfKeyRoot + ACCESS_KEY
+    val AwsSecretKey: String = HadoopConfKeyRoot + SECRET_KEY
+  }
 
   def createSparkContext(maybeAwsProfileName: Option[String]): SparkContext = {
     val conf = createSparkConf(maybeAwsProfileName)
@@ -14,26 +24,27 @@ object SparkUtils {
 
   def createSparkConf(
     maybeAwsProfileName: Option[String],
-    awsCredentialsProvider: String => AWSCredentials = new ProfileCredentialsProvider(_)
-      .getCredentials
+    awsCredentialsProvider: String => AWSCredentials = {
+      new ProfileCredentialsProvider(_).getCredentials
+    }
   ): SparkConf = {
 
     val conf = new SparkConf().setAppName("Convexin Tech Test").setMaster("local[*]")
 
-    maybeAwsProfileName.fold {
-      conf.set("spark.hadoop.fs.s3a.aws.credentials.provider",
-        "com.amazonaws.auth.DefaultAWSCredentialsProviderChain")
-    } { profileName =>
-      val credentials = awsCredentialsProvider(profileName)
-      conf.set("spark.hadoop.fs.s3a.access.key", credentials.getAWSAccessKeyId)
-      conf.set("spark.hadoop.fs.s3a.secret.key", credentials.getAWSSecretKey)
+    maybeAwsProfileName match {
+      case None =>
+        conf.set(AwsCredentialsProvider, "com.amazonaws.auth.DefaultAWSCredentialsProviderChain")
+      case Some(awsProfileName) =>
+        val credentials = awsCredentialsProvider(awsProfileName)
+        conf.set(AwsAccessKey, credentials.getAWSAccessKeyId)
+        conf.set(AwsSecretKey, credentials.getAWSSecretKey)
     }
   }
 
   def saveAsTsvFile(columns: RDD[(String, String)], outputPath: String): Unit = {
-    columns.map(pairToTsvLine).saveAsTextFile(outputPath)
+    columns.map(toTsvLine).saveAsTextFile(outputPath)
   }
 
-  def pairToTsvLine(keyValue: (String, String)): String = s"${keyValue._1}\t${keyValue._2}"
+  def toTsvLine(keyValue: (String, String)): String = s"${keyValue._1}\t${keyValue._2}"
 
 }

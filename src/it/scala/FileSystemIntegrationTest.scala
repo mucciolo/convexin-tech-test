@@ -26,6 +26,6 @@ final class FileSystemIntegrationTest extends AnyFlatSpec with Matchers with Bef
     resultLines shouldEqual expectedLines
   }
 
-  override protected def beforeEach(): Unit = Path(OutputPath).deleteRecursively()
+  override protected def afterEach(): Unit = Path(OutputPath).deleteRecursively()
 
 }

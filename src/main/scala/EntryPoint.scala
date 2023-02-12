@@ -10,26 +10,34 @@ object EntryPoint {
     run(inputPath, outputPath, maybeAwsProfileName)
   }
 
-  def parseArguments(args: Array[String]): (String, String, Option[String]) =
-    args match {
-      case Array(inputPath, outputPath) =>
-        (inputPath, outputPath, None)
+  def parseArguments(args: Array[String]): (String, String, Option[String]) = {
+    val argsOpt = args.lift
 
-      case Array(inputPath, outputPath, awsProfileName, _*) =>
-        (inputPath, outputPath, Some(awsProfileName))
+    (argsOpt(0), argsOpt(1), argsOpt(2)) match {
+      case (Some(inputPath), Some(outputPath), maybeAwsProfileName) =>
+        (inputPath, outputPath, maybeAwsProfileName)
 
       case _ =>
         throw new IllegalArgumentException(
           "Missing arguments. Usage: sbt run <input-path> <output-path> ?<aws-profile>")
     }
+  }
 
-  def run(inputPath: String, outputPath: String, maybeAwsProfileName: Option[String]): Unit = {
+  private def run(
+    inputPath: String, outputPath: String, maybeAwsProfileName: Option[String]
+  ): Unit = {
 
     val sc = createSparkContext(maybeAwsProfileName)
-    val filesLines = sc.textFile(inputPath)
-    val oddCountPairs = uniqueOddCountValuesByKey(filesLines)
 
-    saveAsTsvFile(oddCountPairs, outputPath)
-    sc.stop()
+    try {
+      val filesLines = sc.textFile(inputPath)
+      val oddCountPairs = uniqueOddCountValuesByKey(filesLines)
+
+      saveAsTsvFile(oddCountPairs, outputPath)
+    } finally {
+      sc.stop()
+    }
+
   }
+
 }
