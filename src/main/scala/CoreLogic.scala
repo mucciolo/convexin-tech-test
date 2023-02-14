@@ -1,4 +1,4 @@
-package com.convexin
+package com.mucciolo
 
 import org.apache.spark.rdd.RDD
 
