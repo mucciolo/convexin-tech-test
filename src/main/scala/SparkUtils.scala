@@ -1,4 +1,4 @@
-package com.convexin
+package com.mucciolo
 
 import SparkUtils.SparkConfKeys._
 
@@ -29,7 +29,7 @@ object SparkUtils {
     }
   ): SparkConf = {
 
-    val conf = new SparkConf().setAppName("Convexin Tech Test").setMaster("local[*]")
+    val conf = new SparkConf().setAppName("Spark S3 Integration").setMaster("local[*]")
 
     maybeAwsProfileName match {
       case None =>

@@ -8,8 +8,8 @@ val ScalaTestVersion = "3.2.15"
 lazy val root = (project in file("."))
   .configs(IntegrationTest)
   .settings(
-    name := "convexin-tech-test",
-    idePackagePrefix := Some("com.convexin"),
+    name := "spark-s3-integration",
+    idePackagePrefix := Some("com.mucciolo"),
     libraryDependencies ++= Seq(
       "org.apache.spark" %% "spark-core" % SparkVersion,
       "org.apache.hadoop" % "hadoop-aws" % HadoopVersion,
