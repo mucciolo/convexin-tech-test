@@ -34,9 +34,9 @@ object EntryPoint {
       val filesLines = sc.textFile(inputPath)
       val pairs = parseFileLines(filesLines)
       val oddCountPairs = oddOccurrencesByKey(pairs)
-      val resultTsvLines = pairsToTsvLine(oddCountPairs)
+      val outputTsvLines = pairsToTsvLine(oddCountPairs)
 
-      resultTsvLines.saveAsTextFile(outputPath)
+      outputTsvLines.saveAsTextFile(outputPath)
     } finally {
       sc.stop()
     }

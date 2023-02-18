@@ -1,7 +1,7 @@
 ThisBuild / version := "1.0.0-SNAPSHOT"
 ThisBuild / scalaVersion := "2.13.10"
 
-val SparkVersion = "3.3.1"
+val SparkVersion = "3.3.2"
 val HadoopVersion = "3.3.4"
 val ScalaTestVersion = "3.2.15"
 
