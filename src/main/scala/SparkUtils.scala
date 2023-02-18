@@ -41,10 +41,4 @@ object SparkUtils {
     }
   }
 
-  def saveAsTsvFile(columns: RDD[(String, String)], outputPath: String): Unit = {
-    columns.map(toTsvLine).saveAsTextFile(outputPath)
-  }
-
-  def toTsvLine(keyValue: (String, String)): String = s"${keyValue._1}\t${keyValue._2}"
-
 }

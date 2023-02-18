@@ -1,7 +1,8 @@
 package com.mucciolo
 
+import CoreLogic.oddOccurrencesByKey
+import IOUtils._
 import SparkUtils._
-import UniqueOddCountValuesByKey.uniqueOddCountValuesByKey
 
 object EntryPoint {
 
@@ -31,9 +32,11 @@ object EntryPoint {
 
     try {
       val filesLines = sc.textFile(inputPath)
-      val oddCountPairs = uniqueOddCountValuesByKey(filesLines)
+      val pairs = parseFileLines(filesLines)
+      val oddCountPairs = oddOccurrencesByKey(pairs)
+      val outputTsvLines = pairsToTsvLine(oddCountPairs)
 
-      saveAsTsvFile(oddCountPairs, outputPath)
+      outputTsvLines.saveAsTextFile(outputPath)
     } finally {
       sc.stop()
     }
